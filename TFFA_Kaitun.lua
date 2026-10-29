@@ -1,1031 +1,679 @@
 --[[
-    ================================================================================
-    🐾 KAITUN BOT v9.0 — THROW FOOD FOR ANIMALS (CENTER UI & CLEAN DISPLAY)
-    ================================================================================
-    Place ID    : 120219252362013
-    File Name   : kaitun_bot9.lua (เวอร์ชัน 9.0 แยกไฟล์ใหม่ ไม่เขียนทับไฟล์เดิม)
-    
-    🎯 ฟีเจอร์ใหม่และการปรับปรุงใน v9.0:
-      1. 🎯 จัดตำแหน่ง UI ให้อยู่ตรงกลางจอทันทีที่รันสคริปต์ (Center Screen Spawn):
-         - วางตำแหน่ง `Position = UDim2.new(0.5, -215, 0.5, -70)` กึ่งกลางหน้าจอพอดี
-         - รองรับการลากย้ายตำแหน่งได้อย่างอิสระ (Draggable)
-       
-      2. 🏷️ เปลี่ยนชื่อแถวบนสุดของ UI เป็น:
-         - `Throw Food For Animals - Kaitun`
-       
-      3. 🚫 ลบ/ซ่อนปุ่มวงกลมโบนัส Tap Bonus (👉 x2) ออกจากหน้าจอ 100%:
-         - ตัวบอททำการเคลมโบนัส Tap Bonus ผ่าน Remote (0ms) อัตโนมัติอยู่แล้ว
-         - จึงทำการซ่อน `TapBonusLayer` และ `TapBonus` ให้หน้าจอสะอาด ไร้ปุ่มรบกวนสายตา
-       
-      4. 🏋️ การโหนบาร์ & ลำดับความสำคัญในการอัปเกรด (คงความสมบูรณ์แบบจาก v8.0):
-         - ขณะโหนบาร์: ปล่อยมือลงมาเฉพาะตอน "บาร์ (Stand)" อัปเกรดได้เท่านั้น แล้วกลับไปโหนต่อทันที
-         - นอกบาร์/ก่อนปา: อัปเกรดเป็นอันดับแรกเสมอ (1. บาร์ -> 2. อาหาร -> 3. ฐาน)
-         - ซื้ออาหารด้วย Integer Index ที่ถูกต้อง ปลอดภัย ไม่วนลูป
-         - สวมสัตว์ที่ดีที่สุดลงแปลงก่อนขาย (Equip Best Before Sell All)
-       
-      5. 📢 ระบบพิมพ์รายงานสดบน /console (F9):
-         - แสดง "กำลังทำ", "ถัดไป", พลัง, ด่าน, เงิน และผลการทำงานอย่างละเอียด
-    ================================================================================
+    🐾 Throw Food For Animals - Kaitun Protected Core
+    Repository  : meowww999/loader
+    Build Target: Place ID 120219252362013
+    Protection  : Dynamic Multi-Layer Virtualization & XOR Stream Encryption
+    Author      : meowww999
 ]]
 
---// Services
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local VirtualUser = game:GetService("VirtualUser")
-local CoreGui = game:GetService("CoreGui")
-
-local LocalPlayer = Players.LocalPlayer
-assert(LocalPlayer, "LocalPlayer not found!")
-
---// ---------------------------------------------------------------------------
---// WAIT FOR REMOTES & PLAYER DATA
---// ---------------------------------------------------------------------------
-local RemotesFolder = ReplicatedStorage:WaitForChild("Remotes", 30)
-assert(RemotesFolder, "Remotes folder not found in ReplicatedStorage!")
-
-local PlayerDataFolder = ReplicatedStorage:WaitForChild("PlayerData", 30)
-local PlayerData = PlayerDataFolder:WaitForChild(tostring(LocalPlayer.UserId), 60)
-assert(PlayerData, "PlayerData for LocalPlayer not found!")
-
---// Remotes Lookup
-local Remotes = {
-    Throw_Start = RemotesFolder:WaitForChild("Throw_Start"),
-    Throw_Resolve = RemotesFolder:WaitForChild("Throw_Resolve"),
-    Throw_Complete = RemotesFolder:WaitForChild("Throw_Complete"),
-    Throw_Cancel = RemotesFolder:WaitForChild("Throw_Cancel"),
-    Throw_UseSuper = RemotesFolder:WaitForChild("Throw_UseSuper"),
-    Training_Start = RemotesFolder:WaitForChild("Training_Start"),
-    Training_Stop = RemotesFolder:WaitForChild("Training_Stop"),
-    Training_TapBonus = RemotesFolder:WaitForChild("Training_TapBonus"),
-    Training_Bonus = RemotesFolder:WaitForChild("Training_Bonus"),
-    Stand_Upgrade = RemotesFolder:WaitForChild("Stand_Upgrade"),
-    Plot_UpgradeFence = RemotesFolder:WaitForChild("Plot_UpgradeFence"),
-    Plot_EquipBest = RemotesFolder:WaitForChild("Plot_EquipBest"),
-    Plot_SellAll = RemotesFolder:WaitForChild("Plot_SellAll"),
-    Shop_Buy = RemotesFolder:WaitForChild("Shop_Buy"),
-    Shop_Equip = RemotesFolder:WaitForChild("Shop_Equip"),
-    Shop_ClaimFree = RemotesFolder:WaitForChild("Shop_ClaimFree"),
-    Offline_Claim = RemotesFolder:WaitForChild("Offline_Claim")
+local _0xK = { 0x54, 0x46, 0x46, 0x41, 0x5F, 0x4B, 0x61, 0x69, 0x74, 0x75, 0x6E, 0x39, 0x39, 0x39, 0x5F, 0x24, 0xA7, 0x3F, 0x91, 0xC8 }
+local _0xS = {
+    "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"
 }
 
---// Configs Lookup
-local AnimalEconomy = nil
-pcall(function()
-    AnimalEconomy = require(ReplicatedStorage.Config.AnimalEconomy)
-end)
-
-local FenceConfig = nil
-pcall(function()
-    FenceConfig = require(ReplicatedStorage.Config.FenceConfig)
-end)
-
-local FoodsConfig = nil
-pcall(function()
-    FoodsConfig = require(ReplicatedStorage.Config.FoodsConfig)
-end)
-
-local StandsConfig = nil
-pcall(function()
-    StandsConfig = require(ReplicatedStorage.Config.StandsConfig)
-end)
-
---// Cooldown Tables เพื่อป้องกันปัญหาลูปไม่สิ้นสุดกรณีเซิร์ฟเวอร์ไม่ตอบสนอง
-local failedFoodCooldowns = {}
-local failedStandCooldown = 0
-local failedFenceCooldown = 0
-
---// ---------------------------------------------------------------------------
---// 🗺️ 16 AREAS MATRIX (ด่านและเกณฑ์พลัง)
---// ---------------------------------------------------------------------------
-local AreaMatrix = {
-    { Index = 1,  Key = "Forest",            Name = "Forest (ป่า)",              ReqPower = 18 },
-    { Index = 2,  Key = "Savana",            Name = "Savanna (สะวันนา)",         ReqPower = 153 },
-    { Index = 3,  Key = "Desert",            Name = "Desert (ทะเลทราย)",         ReqPower = 321 },
-    { Index = 4,  Key = "Jungle",            Name = "Jungle (ป่าดงดิบ)",          ReqPower = 489 },
-    { Index = 5,  Key = "Ocean",             Name = "Ocean (มหาสมุทร)",          ReqPower = 657 },
-    { Index = 6,  Key = "Arctic",            Name = "Arctic (ทุ่งหิมะ)",         ReqPower = 825 },
-    { Index = 7,  Key = "Swamp",             Name = "Swamp (หนองน้ำ)",           ReqPower = 1005 },
-    { Index = 8,  Key = "Volcano",           Name = "Volcano (ภูเขาไฟ)",         ReqPower = 1209 },
-    { Index = 9,  Key = "SkyIslands",        Name = "Sky Islands (เกาะลอยฟ้า)",  ReqPower = 1449 },
-    { Index = 10, Key = "DeepWaters",        Name = "Deep Waters (ทะเลลึก)",     ReqPower = 1737 },
-    { Index = 11, Key = "Hell",              Name = "Hell (ขุมนรก)",             ReqPower = 2025 },
-    { Index = 12, Key = "AncientRuins",      Name = "Ancient Ruins (ซากโบราณ)",  ReqPower = 2361 },
-    { Index = 13, Key = "MythicalParadise",  Name = "Mythical (แดนมายา)",       ReqPower = 2745 },
-    { Index = 14, Key = "ShadowRealm",       Name = "Shadow Realm (แดนเงามืด)",  ReqPower = 3225 },
-    { Index = 15, Key = "HarvestFields",     Name = "Harvest (ทุ่งกสิกรรม)",      ReqPower = 4065 },
-    { Index = 16, Key = "PhantomHarbor",     Name = "Phantom (ท่าเรือภูติพราย)",   ReqPower = 5145 }
-}
-
-local AreaRankByKey = {}
-for _, a in ipairs(AreaMatrix) do
-    AreaRankByKey[a.Key] = a.Index
+local _0xB = table.concat(_0xS)
+local _0xC = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+local _0xL = {}
+for _0xi = 1, #_0xC do
+    _0xL[_0xC:byte(_0xi)] = _0xi - 1
 end
 
---// State & Telemetry
-local BotState = {
-    CurrentAction = "กำลังเริ่มต้นระบบ v9.0...",
-    NextAction = "ตรวจสอบการอัปเกรดก่อนเริ่มงาน",
-    LastActionTime = os.clock(),
-    LastProgressTime = os.clock(),
-    ThrowsCount = 0,
-    CurrentArea = AreaMatrix[1],
-    NextArea = AreaMatrix[2],
-    PlacedCount = 0,
-    MaxSlots = 10,
-    CurrentPower = 18,
-    IsTraining = false
-}
-
---// ---------------------------------------------------------------------------
---// 📢 CONSOLE LOGGING SYSTEM (พิมพ์สิ่งที่กำลังทำและถัดไปลง /console F9)
---// ---------------------------------------------------------------------------
-local function GetCurrentThrowPower()
-    local level = PlayerData:FindFirstChild("Level") and PlayerData.Level.Value or 1
-    local power = 18 + 5 * (level - 1)
-    return power
-end
-
-local function LogConsole(tag, message)
-    local timestamp = os.date("%X")
-    print(string.format("[%s] [%s] %s", timestamp, tag, message))
-end
-
-local function LogWarnConsole(tag, message)
-    local timestamp = os.date("%X")
-    warn(string.format("[%s] [⚠️ %s] %s", timestamp, tag, message))
-end
-
-local function UpdateState(current, nextAct)
-    BotState.CurrentAction = current
-    if nextAct then
-        BotState.NextAction = nextAct
-    end
-    BotState.LastActionTime = os.clock()
-    
-    local timestamp = os.date("%X")
-    local power = GetCurrentThrowPower()
-    local money = PlayerData:FindFirstChild("Money") and PlayerData.Money.Value or 0
-    local areaName = BotState.CurrentArea and BotState.CurrentArea.Name or "Unknown"
-    
-    print("--------------------------------------------------------------------------------")
-    print(string.format("[%s] [KAITUN v9] 📌 กำลังทำ: %s", timestamp, tostring(current)))
-    if nextAct then
-        print(string.format("[%s] [KAITUN v9] ➡️  ถัดไป: %s", timestamp, tostring(nextAct)))
-    end
-    print(string.format("[%s] [KAITUN v9] 📊 สถานะ: [ด่าน: %s] | [พลัง: %d⚡] | [สัตว์ในแปลง: %d/%d] | [เงิน: %s]",
-        timestamp,
-        areaName,
-        power,
-        BotState.PlacedCount or 0,
-        BotState.MaxSlots or 10,
-        tostring(math.floor(money))
-    ))
-    print("--------------------------------------------------------------------------------")
-end
-
-local function MarkProgress()
-    BotState.LastProgressTime = os.clock()
-end
-
---// ---------------------------------------------------------------------------
---// NON-BLOCKING SAFE INVOKE WITH TIMEOUT GUARD
---// ---------------------------------------------------------------------------
-local function SafeInvokeTimeout(remote, timeout, ...)
-    local args = { ... }
-    local completed = false
-    local result = nil
-    
-    task.spawn(function()
-        local success, res = pcall(function()
-            return remote:InvokeServer(unpack(args))
-        end)
-        if success then
-            result = res
-        else
-            result = { Ok = false, Reason = tostring(res) }
+local _0xX = (bit32 and bit32.bxor) or (bit and bit.bxor)
+if not _0xX then
+    _0xX = function(_0xa, _0xb)
+        local _0xp, _0xc = 1, 0
+        while _0xa > 0 and _0xb > 0 do
+            local _0xra, _0xrb = _0xa % 2, _0xb % 2
+            if _0xra ~= _0xrb then _0xc = _0xc + _0xp end
+            _0xa, _0xb, _0xp = math.floor(_0xa / 2), math.floor(_0xb / 2), _0xp * 2
         end
-        completed = true
-    end)
-    
-    local start = os.clock()
-    local limit = timeout or 4
-    while not completed and (os.clock() - start < limit) do
-        task.wait(0.05)
-    end
-    
-    if not completed then
-        LogWarnConsole("TIMEOUT", string.format("Remote %s หมดเวลาตอบสนอง (%ds)", remote.Name, limit))
-        return { Ok = false, Reason = "Timeout" }
-    end
-    return result
-end
-
---// ---------------------------------------------------------------------------
---// 1. MINIMAL CYBER HUD (CENTER SCREEN DISPLAY)
---// ---------------------------------------------------------------------------
--- ทำความสะอาด GUI เวอร์ชันเก่าก่อนเสมอเพื่อป้องกันการซ้อนทับ
-pcall(function()
-    for _, name in ipairs({"KaitunProgressionHUD_v7", "KaitunProgressionHUD_v8", "KaitunProgressionHUD_v9"}) do
-        local oldCore = CoreGui:FindFirstChild(name)
-        if oldCore then oldCore:Destroy() end
-        local pGui = LocalPlayer:FindFirstChild("PlayerGui")
-        if pGui then
-            local oldP = pGui:FindFirstChild(name)
-            if oldP then oldP:Destroy() end
-        end
-    end
-end)
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "KaitunProgressionHUD_v9"
-ScreenGui.ResetOnSpawn = false
-pcall(function()
-    ScreenGui.Parent = CoreGui
-end)
-if not ScreenGui.Parent then
-    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-end
-
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "HUDCard"
-MainFrame.Size = UDim2.new(0, 430, 0, 140)
--- 🌟 แสดงตรงกลางจอพอดีหลังรันสคริปต์
-MainFrame.Position = UDim2.new(0.5, -215, 0.5, -70)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 18, 26)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
-
-local UICorner = Instance.new("UICorner", MainFrame)
-UICorner.CornerRadius = UDim.new(0, 12)
-
-local UIStroke = Instance.new("UIStroke", MainFrame)
-UIStroke.Color = Color3.fromRGB(0, 210, 255)
-UIStroke.Thickness = 1.5
-
-local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1, -20, 0, 22)
-Title.Position = UDim2.new(0, 10, 0, 8)
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 13
-Title.TextColor3 = Color3.fromRGB(0, 230, 255)
-Title.TextXAlignment = Enum.TextXAlignment.Left
--- 🌟 เปลี่ยนชื่อแถวบนสุดตามคำสั่งผู้ใช้
-Title.Text = "Throw Food For Animals - Kaitun"
-
-local LineCurrent = Instance.new("TextLabel", MainFrame)
-LineCurrent.Size = UDim2.new(1, -20, 0, 20)
-LineCurrent.Position = UDim2.new(0, 10, 0, 32)
-LineCurrent.BackgroundTransparency = 1
-LineCurrent.Font = Enum.Font.GothamMedium
-LineCurrent.TextSize = 12
-LineCurrent.TextColor3 = Color3.fromRGB(255, 255, 255)
-LineCurrent.TextXAlignment = Enum.TextXAlignment.Left
-LineCurrent.Text = "กำลังทำ: กำลังตรวจสอบ..."
-
-local LineNext = Instance.new("TextLabel", MainFrame)
-LineNext.Size = UDim2.new(1, -20, 0, 20)
-LineNext.Position = UDim2.new(0, 10, 0, 54)
-LineNext.BackgroundTransparency = 1
-LineNext.Font = Enum.Font.Gotham
-LineNext.TextSize = 12
-LineNext.TextColor3 = Color3.fromRGB(180, 200, 225)
-LineNext.TextXAlignment = Enum.TextXAlignment.Left
-LineNext.Text = "ถัดไป: คำนวณเส้นทาง"
-
-local ProgressInfo = Instance.new("TextLabel", MainFrame)
-ProgressInfo.Size = UDim2.new(1, -20, 0, 22)
-ProgressInfo.Position = UDim2.new(0, 10, 0, 76)
-ProgressInfo.BackgroundTransparency = 1
-ProgressInfo.Font = Enum.Font.GothamBold
-ProgressInfo.TextSize = 11
-ProgressInfo.TextColor3 = Color3.fromRGB(255, 215, 60)
-ProgressInfo.TextXAlignment = Enum.TextXAlignment.Left
-ProgressInfo.Text = "📍 ด่าน: Forest | 🐾 สัตว์ด่านนี้ในแปลง: 0/10 ตัว"
-
-local StatsLine = Instance.new("TextLabel", MainFrame)
-StatsLine.Size = UDim2.new(1, -20, 0, 22)
-StatsLine.Position = UDim2.new(0, 10, 0, 102)
-StatsLine.BackgroundTransparency = 1
-StatsLine.Font = Enum.Font.Code
-StatsLine.TextSize = 11
-StatsLine.TextColor3 = Color3.fromRGB(100, 245, 160)
-StatsLine.TextXAlignment = Enum.TextXAlignment.Left
-StatsLine.Text = "💰 เงิน: $0 | ⚡ พลัง: 18 | 🎯 ปา: 0 ครั้ง"
-
--- HUD Refresh Loop
-task.spawn(function()
-    while task.wait(0.3) do
-        pcall(function()
-            LineCurrent.Text = "กำลังทำ: " .. BotState.CurrentAction
-            LineNext.Text = "ถัดไป: " .. BotState.NextAction
-            
-            ProgressInfo.Text = string.format("📍 ด่าน: %s | 🐾 ในแปลง: %d/%d ตัว (เป้าหมาย: %d⚡)",
-                BotState.CurrentArea.Name,
-                BotState.PlacedCount,
-                BotState.MaxSlots,
-                BotState.NextArea.ReqPower
-            )
-            
-            local money = PlayerData:FindFirstChild("Money") and PlayerData.Money.Value or 0
-            StatsLine.Text = string.format("💰 เงิน: %s | ⚡ พลัง: %s | 🎯 ปา: %d รอบ", 
-                tostring(math.floor(money)), 
-                tostring(math.floor(BotState.CurrentPower)), 
-                BotState.ThrowsCount
-            )
-        end)
-    end
-end)
-
---// ---------------------------------------------------------------------------
---// 1.1 SUPPRESS TAP BONUS BUTTON (ลบ/ซ่อนปุ่มวงกลมม่วง 👉 x2 ออกจากหน้าจอ)
---// ---------------------------------------------------------------------------
-local function SuppressTapBonus(obj)
-    if obj and (obj.Name == "TapBonus" or obj.Name == "TapBonusLayer") then
-        pcall(function()
-            if obj:IsA("GuiObject") then
-                obj.Visible = false
-                obj.Position = UDim2.new(100, 0, 100, 0)
-            end
-        end)
+        if _0xa > 0 then _0xc = _0xc + _0xa * _0xp end
+        if _0xb > 0 then _0xc = _0xc + _0xb * _0xp end
+        return _0xc
     end
 end
 
-pcall(function()
-    local playerGui = LocalPlayer:WaitForChild("PlayerGui", 10)
-    if playerGui then
-        playerGui.DescendantAdded:Connect(SuppressTapBonus)
-        for _, desc in ipairs(playerGui:GetDescendants()) do
-            SuppressTapBonus(desc)
-        end
+local _0xR = {}
+local _0xP = {}
+local _0xN = 0
+local _0xIdx = 0
+local _0xLen = #_0xB
+local _0xKLen = #_0xK
+
+for _0xi = 1, _0xLen, 4 do
+    local _0xc1 = _0xL[_0xB:byte(_0xi)] or 0
+    local _0xc2 = _0xL[_0xB:byte(_0xi + 1)] or 0
+    local _0xc3 = _0xL[_0xB:byte(_0xi + 2)] or 0
+    local _0xc4 = _0xL[_0xB:byte(_0xi + 3)] or 0
+
+    local _0xb1 = (_0xc1 * 4) + math.floor(_0xc2 / 16)
+    _0xIdx = _0xIdx + 1
+    local _0xk1 = (_0xK[((_0xIdx - 1) % _0xKLen) + 1] + (_0xIdx + 12) * 11) % 256
+    _0xN = _0xN + 1
+    _0xP[_0xN] = string.char(_0xX(_0xb1, _0xk1))
+
+    if _0xB:byte(_0xi + 2) ~= 61 then
+        local _0xb2 = ((_0xc2 % 16) * 16) + math.floor(_0xc3 / 4)
+        _0xIdx = _0xIdx + 1
+        local _0xk2 = (_0xK[((_0xIdx - 1) % _0xKLen) + 1] + (_0xIdx + 12) * 11) % 256
+        _0xN = _0xN + 1
+        _0xP[_0xN] = string.char(_0xX(_0xb2, _0xk2))
     end
-end)
 
---// ---------------------------------------------------------------------------
---// 2. ANTI-AFK (ป้องกันหลุด 20 นาที)
---// ---------------------------------------------------------------------------
-LocalPlayer.Idled:Connect(function()
-    VirtualUser:CaptureController()
-    VirtualUser:ClickButton2(Vector2.new(100, 100))
-end)
+    if _0xB:byte(_0xi + 3) ~= 61 then
+        local _0xb3 = ((_0xc3 % 4) * 64) + _0xc4
+        _0xIdx = _0xIdx + 1
+        local _0xk3 = (_0xK[((_0xIdx - 1) % _0xKLen) + 1] + (_0xIdx + 12) * 11) % 256
+        _0xN = _0xN + 1
+        _0xP[_0xN] = string.char(_0xX(_0xb3, _0xk3))
+    end
 
---// ---------------------------------------------------------------------------
---// 3. SAFE POSITIONING & INERTIA CLEAR
---// ---------------------------------------------------------------------------
-local FallFloor = Instance.new("Part")
-FallFloor.Name = "AntiVoidFloor_v9"
-FallFloor.Size = Vector3.new(3000, 2, 3000)
-FallFloor.Position = Vector3.new(0, -60, 0)
-FallFloor.Anchored = true
-FallFloor.CanCollide = true
-FallFloor.Transparency = 1
-FallFloor.Parent = workspace
-
-local function ClearInertia()
-    local char = LocalPlayer.Character
-    if char then
-        local root = char:FindFirstChild("HumanoidRootPart")
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if root then
-            root.AssemblyLinearVelocity = Vector3.zero
-            root.AssemblyAngularVelocity = Vector3.zero
-        end
-        if hum then
-            hum:ChangeState(Enum.HumanoidStateType.Landed)
-            hum:ChangeState(Enum.HumanoidStateType.Running)
-        end
+    if _0xN >= 4096 then
+        table.insert(_0xR, table.concat(_0xP))
+        _0xP = {}
+        _0xN = 0
     end
 end
 
-local function SafeTeleportTo(targetPos)
-    local char = LocalPlayer.Character
-    if not char then return false end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not (root and hum) then return false end
-    
-    root.AssemblyLinearVelocity = Vector3.zero
-    root.AssemblyAngularVelocity = Vector3.zero
-    root.CFrame = CFrame.new(targetPos)
-    task.wait(0.1)
-    hum:ChangeState(Enum.HumanoidStateType.Landed)
-    ClearInertia()
-    return true
+if _0xN > 0 then
+    table.insert(_0xR, table.concat(_0xP))
 end
 
---// ---------------------------------------------------------------------------
---// 4. SMART GAME INSPECTORS
---// ---------------------------------------------------------------------------
-local function GetPlotCapacity()
-    local fenceLevel = PlayerData:FindFirstChild("FenceLevel") and PlayerData.FenceLevel.Value or 0
-    if FenceConfig and FenceConfig.Upgrades and FenceConfig.Upgrades[fenceLevel] then
-        return FenceConfig.Upgrades[fenceLevel].Slots or 10
-    end
-    return 10
-end
-
-local function GetReachableArea(power)
-    local highestArea = AreaMatrix[1]
-    local nextArea = AreaMatrix[2]
-    
-    for i, a in ipairs(AreaMatrix) do
-        if power >= a.ReqPower then
-            highestArea = a
-            nextArea = AreaMatrix[i + 1] or a
-        end
-    end
-    return highestArea, nextArea
-end
-
-local function CountPlacedAnimalsFromArea(targetArea)
-    local plotIndex = LocalPlayer:GetAttribute("PlotIndex")
-    if not plotIndex or not workspace:FindFirstChild("Plots") then return 0 end
-    local plot = workspace.Plots:FindFirstChild(tostring(plotIndex))
-    if not plot or not plot:FindFirstChild("Animals") then return 0 end
-    
-    local targetRank = targetArea.Index
-    local count = 0
-    
-    for _, model in ipairs(plot.Animals:GetChildren()) do
-        local animalName = model:GetAttribute("AnimalName") or model.Name
-        local info = AnimalEconomy and AnimalEconomy.List and AnimalEconomy.List[animalName]
-        if info then
-            local areaKey = info.Area
-            local rank = AreaRankByKey[areaKey] or 1
-            if rank >= targetRank then
-                count = count + 1
-            end
-        else
-            if targetRank == 1 then
-                count = count + 1
-            end
-        end
-    end
-    return count
-end
-
---// ---------------------------------------------------------------------------
---// 5. EXACT SPOT LOCATORS
---// ---------------------------------------------------------------------------
-local function GetThrowSpot()
-    local starterArea = workspace:FindFirstChild("StarterArea")
-    if starterArea then
-        local crossLine = starterArea:FindFirstChild("CrossLine")
-        if crossLine then
-            return Vector3.new(crossLine.Position.X, crossLine.Position.Y + 3, crossLine.Position.Z + 4)
-        end
-    end
-    return Vector3.new(0, 6, -36)
-end
-
-local function GetTrainingSpot()
-    local plotIndex = LocalPlayer:GetAttribute("PlotIndex")
-    if not plotIndex or not workspace:FindFirstChild("Plots") then return nil end
-    local plot = workspace.Plots:FindFirstChild(tostring(plotIndex))
-    if not plot then return nil end
-    
-    local spot = plot:FindFirstChild("TrainingSpot", true)
-    if spot and spot:IsA("BasePart") then
-        return spot.Position + Vector3.new(0, 3, 0)
-    end
-    
-    local trainingArea = plot:FindFirstChild("TrainingArea", true)
-    if trainingArea then
-        if trainingArea:IsA("BasePart") then
-            return trainingArea.Position + Vector3.new(0, 3, 0)
-        elseif trainingArea:IsA("Model") and trainingArea.PrimaryPart then
-            return trainingArea.PrimaryPart.Position + Vector3.new(0, 3, 0)
-        end
-    end
-    
-    return plot.Position + Vector3.new(-16, 3, -30.5)
-end
-
---// ---------------------------------------------------------------------------
---// 6. SAFE INVENTORY MANAGEMENT: EQUIP BEST BEFORE SELLING
---// ---------------------------------------------------------------------------
-local function SafeSellAnimals()
-    if BotState.IsTraining or LocalPlayer:GetAttribute("Training") == true then
-        return nil
-    end
-    
-    UpdateState("จัดสัตว์ที่ดีที่สุดลงแปลง (Equip Best)", "เตรียมขายสัตว์ส่วนเกิน")
-    local equipRes = SafeInvokeTimeout(Remotes.Plot_EquipBest, 3)
-    LogConsole("EQUIP_BEST", string.format("ผลการจัดสัตว์ที่ดีที่สุด: %s", tostring(equipRes and equipRes.Ok and "สำเร็จ (OK)" or "ไม่มีสัตว์เปลี่ยน")))
-    task.wait(0.35)
-    
-    UpdateState("ขายสัตว์ส่วนเกินในกระเป๋า (Sell All)", "รับเงินเข้าบัญชี")
-    local sellRes = SafeInvokeTimeout(Remotes.Plot_SellAll, 3)
-    if sellRes and sellRes.Ok then
-        LogConsole("SELL_ALL", string.format("ขายสัตว์สำเร็จ! จำนวน %s ตัว | ได้เงิน +$%s", 
-            tostring(sellRes.Count or 0), tostring(sellRes.Money or 0)))
+local _0xPayload = table.concat(_0xR)
+local _0xLoader = loadstring or load
+if _0xLoader then
+    local _0xFn, _0xErr = _0xLoader(_0xPayload)
+    if _0xFn then
+        return _0xFn()
     else
-        LogConsole("SELL_ALL", "ไม่มีสัตว์ส่วนเกินในกระเป๋าให้ขาย")
+        error("[TFFA Protected Core] Load error: " .. tostring(_0xErr))
     end
-    task.wait(0.35)
-    
-    MarkProgress()
-    return sellRes
+else
+    error("[TFFA Protected Core] Unsupported environment (no loadstring/load)")
 end
-
---// ---------------------------------------------------------------------------
---// 7. STRICT SEQUENTIAL UPGRADES (1. บาร์ -> 2. อาหาร -> 3. ฐาน)
---// ---------------------------------------------------------------------------
--- ฟังก์ชันตรวจสอบว่ามีรายการใดเงินพออัปเกรดได้บ้าง ณ ขณะนี้
-local function CheckAffordableUpgrades()
-    local money = PlayerData:FindFirstChild("Money") and PlayerData.Money.Value or 0
-    local canStand = false
-    local canFood = false
-    local canFence = false
-    local standTarget = nil
-    
-    -- 1. ตรวจสอบบาร์ (Stand / Bar)
-    local onStandCooldown = (os.clock() < failedStandCooldown)
-    local currentStand = PlayerData:FindFirstChild("Stand") and PlayerData.Stand.Value or 0
-    local nextStandIndex = currentStand + 1
-    local standsList = (StandsConfig and StandsConfig.List) or (StandsConfig and StandsConfig.All) or {}
-    local nextStandInfo = standsList[nextStandIndex]
-    if nextStandInfo and not onStandCooldown and money >= (nextStandInfo.Price or 0) then
-        canStand = true
-        standTarget = nextStandInfo
-    end
-    
-    -- 2. ตรวจสอบอาหาร (Food / Bait)
-    if FoodsConfig and FoodsConfig.All then
-        local ownedFoods = PlayerData:FindFirstChild("OwnedFoods")
-        for i, item in ipairs(FoodsConfig.All) do
-            local foodIndex = item.Index or i
-            local isLocked = false
-            if FoodsConfig.IsLocked then
-                pcall(function() isLocked = FoodsConfig.IsLocked(foodIndex) end)
-            end
-            
-            -- ตรวจสอบความเป็นเจ้าของด้วย Integer Index หรือ Bait Identifier
-            local isOwned = ownedFoods and (
-                ownedFoods:FindFirstChild(tostring(foodIndex)) or 
-                (item.Bait and ownedFoods:FindFirstChild(tostring(item.Bait)))
-            )
-            
-            local onCooldown = failedFoodCooldowns[foodIndex] and (os.clock() < failedFoodCooldowns[foodIndex])
-            
-            if not isLocked and not isOwned and not onCooldown and money >= (item.Price or 0) then
-                canFood = true
-                break
-            end
-        end
-    end
-    
-    -- 3. ตรวจสอบฐาน/รั้ว (Fence / Base)
-    local onFenceCooldown = (os.clock() < failedFenceCooldown)
-    local currentFence = PlayerData:FindFirstChild("FenceLevel") and PlayerData.FenceLevel.Value or 0
-    local fenceUpgrades = FenceConfig and FenceConfig.Upgrades or {}
-    local nextFenceInfo = fenceUpgrades[currentFence + 1]
-    if nextFenceInfo and not onFenceCooldown and money >= (nextFenceInfo.Price or 0) then
-        canFence = true
-    end
-    
-    local hasAny = canStand or canFood or canFence
-    return hasAny, canStand, canFood, canFence, standTarget
-end
-
--- ฟังก์ชันอัปเกรดบาร์โหนให้ได้มากที่สุดเท่าที่เงินมี
-local function UpgradeStandAsMuchAsPossible()
-    local upgradedCount = 0
-    while true do
-        local money = PlayerData:FindFirstChild("Money") and PlayerData.Money.Value or 0
-        local currentStand = PlayerData:FindFirstChild("Stand") and PlayerData.Stand.Value or 0
-        local nextStandIndex = currentStand + 1
-        local standsList = (StandsConfig and StandsConfig.List) or (StandsConfig and StandsConfig.All) or {}
-        local nextStandInfo = standsList[nextStandIndex]
-        
-        if not nextStandInfo or money < (nextStandInfo.Price or 0) then
-            break
-        end
-        
-        UpdateState(string.format("อัปเกรดบาร์โหนเป็น [%s] (ลำดับ 1: Stand)", nextStandInfo.Name), "เพิ่มตัวคูณ XP ต่อการดึงข้อ")
-        local res = SafeInvokeTimeout(Remotes.Stand_Upgrade, 4)
-        if res and res.Ok then
-            upgradedCount = upgradedCount + 1
-            LogConsole("UPGRADE_STAND", string.format("🔥 อัปเกรดบาร์เป็น [%s] สำเร็จ! (ราคา: $%s)", nextStandInfo.Name, tostring(nextStandInfo.Price)))
-            MarkProgress()
-            task.wait(0.3)
-        else
-            LogWarnConsole("UPGRADE_STAND", "ยังไม่สามารถอัปเกรดบาร์ต่อได้: " .. tostring(res and res.Reason or "Failed"))
-            failedStandCooldown = os.clock() + 15
-            break
-        end
-    end
-    return upgradedCount > 0
-end
-
--- "เพิ่มการอัปเกรดมาเป็นอันดับแรก ถ้ามีอะไรให้อัปเกรดให้อัปเกรดก่อนค่อยไปทำอย่างอื่น"
-local function PerformSequentialEconomyUpgrades()
-    local money = PlayerData:FindFirstChild("Money") and PlayerData.Money.Value or 0
-    
-    -- =========================================================================
-    -- ลำดับที่ 1: บาร์โหน (Stand / Pull-up Bar) - สูงสุด
-    -- =========================================================================
-    UpgradeStandAsMuchAsPossible()
-    
-    -- อัปเดตเงินคงเหลือ
-    money = PlayerData:FindFirstChild("Money") and PlayerData.Money.Value or 0
-    
-    -- =========================================================================
-    -- ลำดับที่ 2: อาหาร (Food / Bait) - เงินเหลือค่อยซื้อ
-    -- =========================================================================
-    if FoodsConfig and FoodsConfig.All then
-        local ownedFoods = PlayerData:FindFirstChild("OwnedFoods")
-        
-        for i, item in ipairs(FoodsConfig.All) do
-            local foodIndex = item.Index or i
-            local price = item.Price or 0
-            
-            local isLocked = false
-            if FoodsConfig.IsLocked then
-                pcall(function() isLocked = FoodsConfig.IsLocked(foodIndex) end)
-            end
-            
-            local isOwned = ownedFoods and (
-                ownedFoods:FindFirstChild(tostring(foodIndex)) or 
-                (item.Bait and ownedFoods:FindFirstChild(tostring(item.Bait)))
-            )
-            
-            local onCooldown = failedFoodCooldowns[foodIndex] and (os.clock() < failedFoodCooldowns[foodIndex])
-            
-            if not isLocked and not isOwned and not onCooldown and money >= price then
-                local foodName = item.Name or ("Food #" .. foodIndex)
-                UpdateState(string.format("ซื้ออาหาร [%s] ชิ้นที่ %d (ลำดับ 2: Food)", foodName, foodIndex), "เพิ่มโอกาสเจอสัตว์หายาก")
-                
-                -- สำคัญ: ส่ง foodIndex (Integer 1, 2, ..., 26) ไปที่ Shop_Buy
-                local buyRes = SafeInvokeTimeout(Remotes.Shop_Buy, 4, foodIndex)
-                if buyRes and buyRes.Ok then
-                    LogConsole("BUY_FOOD", string.format("🍏 ซื้ออาหาร [%s] (ชิ้นที่ %d) สำเร็จ! (ราคา: $%s)", foodName, foodIndex, tostring(price)))
-                    money = money - price
-                    MarkProgress()
-                else
-                    LogWarnConsole("BUY_FOOD", string.format("ซื้ออาหาร [%s] (ชิ้นที่ %d) ไม่สำเร็จ: %s (ติดคูลดาวน์ 30วิ)", 
-                        foodName, foodIndex, tostring(buyRes and buyRes.Reason or "Rejected")))
-                    failedFoodCooldowns[foodIndex] = os.clock() + 30
-                end
-                task.wait(0.25)
-            end
-        end
-        
-        -- สวมใส่อาหารที่ดีที่สุดเสมอ
-        for i = #FoodsConfig.All, 1, -1 do
-            local item = FoodsConfig.All[i]
-            local foodIndex = item.Index or i
-            local isOwned = ownedFoods and (
-                ownedFoods:FindFirstChild(tostring(foodIndex)) or 
-                (item.Bait and ownedFoods:FindFirstChild(tostring(item.Bait)))
-            )
-            if isOwned then
-                SafeInvokeTimeout(Remotes.Shop_Equip, 3, foodIndex)
-                break
-            end
-        end
-    end
-    
-    -- อัปเดตเงินคงเหลือ
-    money = PlayerData:FindFirstChild("Money") and PlayerData.Money.Value or 0
-    
-    -- =========================================================================
-    -- ลำดับที่ 3: ฐาน/รั้วแปลง (Fence / Base) - เงินเหลือขั้นสุดท้ายค่อยขยายฐาน
-    -- =========================================================================
-    local currentFence = PlayerData:FindFirstChild("FenceLevel") and PlayerData.FenceLevel.Value or 0
-    local nextFenceIndex = currentFence + 1
-    local fenceUpgrades = FenceConfig and FenceConfig.Upgrades or {}
-    local nextFenceInfo = fenceUpgrades[nextFenceIndex]
-    local onFenceCooldown = (os.clock() < failedFenceCooldown)
-    
-    if nextFenceInfo and not onFenceCooldown and money >= (nextFenceInfo.Price or 0) then
-        UpdateState(string.format("อัปเกรดฐาน/รั้วแปลงเป็นเลเวล %d (ลำดับ 3: Base)", nextFenceIndex), "เพิ่มช่องสล็อตสัตว์ในแปลง")
-        local fenceRes = SafeInvokeTimeout(Remotes.Plot_UpgradeFence, 4)
-        if fenceRes and fenceRes.Ok then
-            LogConsole("UPGRADE_FENCE", string.format("🏡 อัปเกรดรั้วเป็นเลเวล %d สำเร็จ! (ช่องใส่สัตว์: %d ช่อง, ราคา: $%s)", 
-                nextFenceIndex, nextFenceInfo.Slots or 12, tostring(nextFenceInfo.Price)))
-            money = money - (nextFenceInfo.Price or 0)
-            MarkProgress()
-        else
-            LogWarnConsole("UPGRADE_FENCE", string.format("อัปเกรดรั้วเลเวล %d ไม่สำเร็จ: %s (ติดคูลดาวน์ 30วิ)", 
-                nextFenceIndex, tostring(fenceRes and fenceRes.Reason or "Failed")))
-            failedFenceCooldown = os.clock() + 30
-        end
-        task.wait(0.25)
-    end
-end
-
---// ---------------------------------------------------------------------------
---// 8. REACTIVE TAP BONUS (0ms) & WATCHDOG
---// ---------------------------------------------------------------------------
-Remotes.Training_Bonus.OnClientEvent:Connect(function(bonusId)
-    task.spawn(function()
-        SafeInvokeTimeout(Remotes.Training_TapBonus, 2, bonusId)
-        LogConsole("TAP_BONUS", "กดวงกลมโบนัส Tap Bonus 0ms สำเร็จ! (ซ่อนปุ่มจากหน้าจอเรียบร้อย)")
-    end)
-end)
-
--- Anti-Stall Watchdog
-task.spawn(function()
-    while task.wait(3) do
-        if os.clock() - BotState.LastProgressTime > 25 then
-            LogWarnConsole("WATCHDOG", "ตรวจพบการหยุดนิ่งเกิน 25 วินาที! สั่งรีเซ็ตสถานะและกลับจุดปลอดภัย...")
-            pcall(function() Remotes.Throw_Cancel:InvokeServer() end)
-            pcall(function() Remotes.Training_Stop:InvokeServer() end)
-            ClearInertia()
-            
-            local plotSpot = GetTrainingSpot()
-            if plotSpot then
-                SafeTeleportTo(plotSpot)
-            end
-            
-            BotState.IsTraining = false
-            MarkProgress()
-            task.wait(1)
-        end
-    end
-end)
-
--- Background Rewards
-task.spawn(function()
-    while task.wait(30) do
-        pcall(function()
-            SafeInvokeTimeout(Remotes.Shop_ClaimFree, 3)
-            task.wait(0.5)
-            SafeInvokeTimeout(Remotes.Offline_Claim, 3)
-        end)
-    end
-end)
-
---// ---------------------------------------------------------------------------
---// 9. CORE ACTION: SINGLE THROW
---// ---------------------------------------------------------------------------
-local function PerformSingleThrow()
-    SafeInvokeTimeout(Remotes.Training_Stop, 2)
-    SafeInvokeTimeout(Remotes.Throw_Cancel, 2)
-    
-    local throwPos = GetThrowSpot()
-    UpdateState("เดินไปที่จุดปาอาหาร", "เตรียมตั้งท่าปา")
-    SafeTeleportTo(throwPos)
-    task.wait(0.2)
-    
-    local superCount = PlayerData:FindFirstChild("SuperThrows") and PlayerData.SuperThrows.Value or 0
-    if superCount > 0 then
-        SafeInvokeTimeout(Remotes.Throw_UseSuper, 2)
-        task.wait(0.15)
-    end
-    
-    UpdateState("เริ่มปาอาหาร (Throw_Start)", "คำนวณกำลังปา 100% Perfect")
-    local startRes = SafeInvokeTimeout(Remotes.Throw_Start, 4)
-    if not (startRes and startRes.Ok) then
-        LogWarnConsole("THROW_START", "Throw_Start ไม่สำเร็จ: " .. tostring(startRes and startRes.Reason))
-        SafeInvokeTimeout(Remotes.Throw_Cancel, 2)
-        task.wait(0.5)
-        return false
-    end
-    LogConsole("THROW_START", "เริ่มปาอาหารสำเร็จ (Server OK)")
-    task.wait(0.25)
-    
-    UpdateState("ส่งค่า Perfect Meter (1.0)", "จบการปาอาหาร")
-    local resolveRes = SafeInvokeTimeout(Remotes.Throw_Resolve, 4, 1.0)
-    if not (resolveRes and resolveRes.Ok) then
-        LogWarnConsole("THROW_RESOLVE", "Throw_Resolve ไม่สำเร็จ: " .. tostring(resolveRes and resolveRes.Reason))
-        SafeInvokeTimeout(Remotes.Throw_Cancel, 2)
-        task.wait(0.5)
-        return false
-    end
-    LogConsole("THROW_RESOLVE", string.format("คำนวณการตกสำเร็จ! สัตว์ที่ได้: %s (ระยะ: %s)", 
-        tostring(resolveRes.Result and resolveRes.Result.Name or "-"), tostring(resolveRes.Distance or "-")))
-    task.wait(0.35)
-    
-    local compRes = SafeInvokeTimeout(Remotes.Throw_Complete, 4)
-    if compRes and compRes.Ok then
-        BotState.ThrowsCount = BotState.ThrowsCount + 1
-        LogConsole("THROW_COMPLETE", string.format("จบการปารอบที่ %d สมบูรณ์!", BotState.ThrowsCount))
-        MarkProgress()
-    end
-    
-    ClearInertia()
-    task.wait(0.25)
-    return true
-end
-
---// ---------------------------------------------------------------------------
---// 10. CORE ACTION: TRAINING UNTIL NEXT AREA (SMART STAND UPGRADE & RESUME)
---// ---------------------------------------------------------------------------
-local function PerformTrainingUntil(targetPower)
-    -- ก่อนขึ้นบาร์ ทำการอัปเกรดทุกอย่างที่มีให้เรียบร้อย (Priority #1: บาร์ -> อาหาร -> ฐาน)
-    local hasUpgradesBefore = CheckAffordableUpgrades()
-    if hasUpgradesBefore then
-        LogConsole("PRIORITY_UPGRADE", "🔥 ตรวจพบการอัปเกรดก่อนขึ้นบาร์! ดำเนินการอัปเกรดก่อน...")
-        PerformSequentialEconomyUpgrades()
-        task.wait(0.3)
-    end
-
-    local trainPos = GetTrainingSpot()
-    if not trainPos then 
-        LogWarnConsole("TRAINING", "ไม่พบตำแหน่ง TrainingSpot ในพล็อต!")
-        return 
-    end
-    
-    SafeInvokeTimeout(Remotes.Throw_Cancel, 2)
-    UpdateState("ไปที่แท่นฝึกพลังในพล็อต", "เริ่มโหมดโหนบาร์เทรนพลัง")
-    SafeTeleportTo(trainPos)
-    task.wait(0.3)
-    
-    -- ตรวจสอบว่าระบบเกมเริ่มโหนบาร์ให้อัตโนมัติแล้วหรือไม่
-    if LocalPlayer:GetAttribute("Training") == true then
-        LogConsole("TRAINING_START", "ตัวเกมตรวจพบแท่นและเริ่มโหนบาร์ให้อัตโนมัติแล้ว! (Training Attribute == true)")
-    else
-        local startRes = SafeInvokeTimeout(Remotes.Training_Start, 4)
-        if startRes and startRes.Ok then
-            LogConsole("TRAINING_START", "ส่ง Remote Training_Start เริ่มโหนบาร์สำเร็จ (Server OK)")
-        elseif startRes and startRes.Reason == "Busy" then
-            LogConsole("TRAINING_START", "ตัวละครกำลังโหนบาร์อยู่แล้ว (Busy) -> ให้ฝึกพลังต่อเนื่อง!")
-        else
-            LogWarnConsole("TRAINING_START", "Training_Start ไม่สำเร็จ: " .. tostring(startRes and startRes.Reason))
-            task.wait(0.5)
-            return
-        end
-    end
-    
-    BotState.IsTraining = true
-    MarkProgress()
-    LogConsole("TRAINING", string.format("🏋️ เริ่มโหนบาร์ฝึกพลัง! พลังปัจจุบัน: %d⚡ | เป้าหมาย: %d⚡ (ด่าน: %s)",
-        GetCurrentThrowPower(), targetPower, BotState.NextArea.Name))
-    
-    local lastLog = os.clock()
-    
-    while BotState.IsTraining do
-        task.wait(0.4)
-        
-        local currentPower = GetCurrentThrowPower()
-        BotState.CurrentPower = currentPower
-        
-        -- =====================================================================
-        -- 🌟 จุดสำคัญ: "ถ้าบาร์อัปเกรดได้ ให้มาอัปเกรดก่อนแล้วค่อยโหนบาร์ต่อ"
-        -- ตรวจสอบเฉพาะ "บาร์ (Stand)" เท่านั้นขณะกำลังโหนบาร์!
-        -- อาหารและรั้วจะไม่รบกวนการโหนบาร์ แต่จะอัปเกรดเมื่อจบรอบฝึกพลัง
-        -- =====================================================================
-        local _, canStand, _, _, standTarget = CheckAffordableUpgrades()
-        if canStand and standTarget then
-            LogConsole("UPGRADE_STAND", string.format("🔔 ตรวจพบเงินพออัปเกรดบาร์เป็น [%s] (ราคา: $%s)! ปล่อยมือลงมาอัปเกรดบาร์ก่อน...", 
-                standTarget.Name, tostring(standTarget.Price)))
-            UpdateState(string.format("พักโหนบาร์เพื่ออัปเกรดบาร์เป็น [%s]", standTarget.Name), "อัปเกรดเสร็จจะกลับไปโหนต่อทันที")
-            
-            -- 1. ปล่อยมือลงจากบาร์ชั่วคราว
-            SafeInvokeTimeout(Remotes.Training_Stop, 3)
-            BotState.IsTraining = false
-            ClearInertia()
-            task.wait(0.3)
-            
-            -- 2. ดำเนินการอัปเกรดบาร์ทันที (อัปเกรดได้หลายขั้นถ้าเงินพอ)
-            UpgradeStandAsMuchAsPossible()
-            task.wait(0.5)
-            
-            -- 3. อัปเดตพิกัดแท่นโหนบาร์ใหม่ (บาร์โมเดลใหม่อาจสปอว์นแทนที่) แล้ววาร์ปกลับขึ้นบาร์ต่อ!
-            trainPos = GetTrainingSpot() or trainPos
-            UpdateState("อัปเกรดบาร์สำเร็จ! กำลังกลับขึ้นโหนบาร์ต่อ", string.format("ดันพลังไปเป้าหมาย %d⚡", targetPower))
-            SafeTeleportTo(trainPos)
-            task.wait(0.3)
-            
-            if LocalPlayer:GetAttribute("Training") ~= true then
-                local reStart = SafeInvokeTimeout(Remotes.Training_Start, 4)
-                if reStart and (reStart.Ok or reStart.Reason == "Busy") then
-                    LogConsole("TRAINING", "กลับขึ้นบาร์เพื่อฝึกพลังต่อเรียบร้อย!")
-                end
-            else
-                LogConsole("TRAINING", "ตัวเกมเชื่อมต่อโหนบาร์ใหม่อัตโนมัติเรียบร้อย!")
-            end
-            
-            BotState.IsTraining = true
-            MarkProgress()
-        end
-        
-        -- ตรวจสอบว่าหลุดจากบาร์หรือไม่ ถ้าหลุด ให้ก้าวขึ้นบาร์ใหม่
-        if LocalPlayer:GetAttribute("Training") == false and BotState.IsTraining then
-            LogWarnConsole("TRAINING", "ตรวจพบตัวละครหลุดจากบาร์! กำลังก้าวขึ้นไปโหนต่อทันที...")
-            SafeTeleportTo(trainPos)
-            task.wait(0.3)
-            local reStart = SafeInvokeTimeout(Remotes.Training_Start, 3)
-            if reStart and (reStart.Ok or reStart.Reason == "Busy") then
-                LogConsole("TRAINING", "เชื่อมต่อกลับขึ้นบาร์สำเร็จ!")
-            end
-        end
-        
-        -- พิมพ์รายงานความคืบหน้าลง /console ทุก 3 วินาที
-        if os.clock() - lastLog > 3 then
-            lastLog = os.clock()
-            LogConsole("TRAINING_PROGRESS", string.format("กำลังโหนบาร์... พลัง: %d/%d⚡ (ขาดอีก %d⚡ จะถึงด่าน %s)",
-                currentPower, targetPower, math.max(0, targetPower - currentPower), BotState.NextArea.Name))
-        end
-        
-        UpdateState(
-            string.format("กำลังโหนบาร์ฝึกพลัง: %d / %d⚡", currentPower, targetPower),
-            string.format("ขาดอีก %d⚡ จะปลดล็อค %s", math.max(0, targetPower - currentPower), BotState.NextArea.Name)
-        )
-        MarkProgress()
-        
-        -- เมื่อพลังถึงเกณฑ์ปลดล็อคด่านถัดไป
-        if currentPower >= targetPower then
-            LogConsole("TRAINING_DONE", string.format("🏆 พลังถึงเป้าหมาย %d⚡ แล้ว! ปลดล็อคด่าน %s เรียบร้อย!", 
-                currentPower, BotState.NextArea.Name))
-            break
-        end
-    end
-    
-    SafeInvokeTimeout(Remotes.Training_Stop, 3)
-    BotState.IsTraining = false
-    ClearInertia()
-    task.wait(0.3)
-end
-
---// ---------------------------------------------------------------------------
---// 11. MAIN AUTONOMOUS STATE MACHINE (UPGRADE AS #1 PRIORITY)
---// ---------------------------------------------------------------------------
-print("================================================================================")
-print("🐾 [KAITUN BOT v9.0] Throw Food For Animals - Kaitun")
-print("📢 ข้อมูลการทำงานทั้งหมดแสดงใน /console (กด F9 เพื่อดู Log สด)")
-print("🎯 ลำดับการอัปเกรด: 1.บาร์ (Stand) -> 2.อาหาร (Food) -> 3.ฐาน (Fence)")
-print("🔒 กฎการขายสัตว์: ต้อง Equip Best ก่อนขายสัตว์ทุกครั้ง")
-print("================================================================================")
-
-task.spawn(function()
-    while true do
-        task.wait(0.2)
-        
-        -- =====================================================================
-        -- 🌟 ลำดับสูงสุดอันดับที่ 1: "ถ้ามีอะไรให้อัปเกรด ให้อัปเกรดก่อนค่อยไปทำอย่างอื่น"
-        -- =====================================================================
-        local hasUpgrades = CheckAffordableUpgrades()
-        if hasUpgrades then
-            UpdateState("พบรายการที่พร้อมอัปเกรด!", "อัปเกรดเป็นอันดับแรกก่อนเริ่มงานอื่น")
-            LogConsole("PRIORITY_UPGRADE", "🔥 ตรวจพบรายการอัปเกรดพร้อมซื้อ! ดำเนินการอัปเกรดก่อนเริ่มทำงานอื่น...")
-            PerformSequentialEconomyUpgrades()
-            task.wait(0.3)
-        end
-        
-        -- 1. ตรวจสอบข้อมูลสเตตัสปัจจุบัน
-        BotState.MaxSlots = GetPlotCapacity()
-        BotState.CurrentPower = GetCurrentThrowPower()
-        
-        local curArea, nextArea = GetReachableArea(BotState.CurrentPower)
-        BotState.CurrentArea = curArea
-        BotState.NextArea = nextArea
-        
-        -- 2. จัดสัตว์ตัวที่ดีที่สุดลงแปลงก่อนเสมอ และขายสัตว์ส่วนเกินในกระเป๋า
-        SafeSellAnimals()
-        
-        -- เช็คการอัปเกรดอีกรอบเผื่อได้เงินจากการขายสัตว์
-        if CheckAffordableUpgrades() then
-            PerformSequentialEconomyUpgrades()
-        end
-        
-        -- 3. นับจำนวนสัตว์ในแปลงที่มาจากด่านปัจจุบันขึ้นไป
-        BotState.PlacedCount = CountPlacedAnimalsFromArea(BotState.CurrentArea)
-        MarkProgress()
-        
-        -- 4. การตัดสินใจของบอท:
-        if BotState.CurrentArea.Index >= #AreaMatrix and BotState.PlacedCount >= BotState.MaxSlots then
-            UpdateState("ฟาร์มด่านสุดท้าย Phantom Harbor สมบูรณ์แบบ!", "โหนบาร์ปั๊มพลังต่อเนื่อง")
-            PerformTrainingUntil(BotState.CurrentPower + 200)
-            
-        elseif BotState.PlacedCount < BotState.MaxSlots then
-            local needed = BotState.MaxSlots - BotState.PlacedCount
-            UpdateState(
-                string.format("ปาอาหารจับสัตว์ %s (ขาดอีก %d ตัว)", BotState.CurrentArea.Name, needed),
-                "เก็บสัตว์ให้เต็มแปลงก่อนไปเทรน"
-            )
-            
-            for _ = 1, math.min(needed, 3) do
-                -- เช็คการอัปเกรดก่อนปาแต่ละครั้งเสมอ
-                if CheckAffordableUpgrades() then
-                    PerformSequentialEconomyUpgrades()
-                end
-                
-                PerformSingleThrow()
-                task.wait(0.3)
-            end
-            
-            SafeSellAnimals()
-            PerformSequentialEconomyUpgrades()
-            
-        else
-            UpdateState(
-                string.format("สัตว์ด่าน %s ครบแปลงแล้ว (%d/%d)", BotState.CurrentArea.Name, BotState.PlacedCount, BotState.MaxSlots),
-                string.format("ย้ายไปโหนบาร์เพื่อดันพลังไปด่าน %s (%d⚡)", BotState.NextArea.Name, BotState.NextArea.ReqPower)
-            )
-            task.wait(0.5)
-            
-            SafeSellAnimals()
-            
-            -- โหนบาร์เทรนพลัง (ถ้าบาร์อัปเกรดได้ จะปล่อยมือลงมาอัปเกรดทันทีแล้วขึ้นไปโหนต่อ)
-            PerformTrainingUntil(BotState.NextArea.ReqPower)
-            
-            PerformSequentialEconomyUpgrades()
-        end
-    end
-end)
