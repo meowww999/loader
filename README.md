@@ -1,8 +1,17 @@
-# 🐾 Climb For Animals Eggs - Kaitun Script Loader
+# 🐾 Roblox Kaitun Scripts Loader
 
-Protected loader for Climb For Animals Eggs (Place ID: 85738654635245).
+Central script loader repository for Kaitun bots.
 
-### 🚀 Execute Script
+---
+
+### 1. 🍖 Throw Food For Animals (Place ID: 120219252362013)
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/meowww999/loader/main/TFFA_Kaitun.lua"))()
+```
+
+---
+
+### 2. 🥚 Climb For Animals Eggs (Place ID: 85738654635245)
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/meowww999/loader/main/CFAE_Kaitun.lua"))()
 ```
