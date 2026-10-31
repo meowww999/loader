@@ -15,3 +15,10 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/meowww999/loader/main
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/meowww999/loader/main/CFAE_Kaitun.lua"))()
 ```
+
+---
+
+### 3. 🐾 Steal A Pet And Ride It! (Place ID: 95168737547508)
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/meowww999/loader/main/SAPARI_Kaitun.lua"))()
+```
